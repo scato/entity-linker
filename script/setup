@@ -5,4 +5,4 @@ cd "$(dirname $0)/.."
 
 script/bootstrap
 
-bin/create_data_set
+bin/create_data_sets

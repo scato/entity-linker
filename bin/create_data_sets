@@ -11,6 +11,8 @@ from entity_linker.data.xml import read_redirects
 from entity_linker.data.xml import read_pages
 from entity_linker.data.wiki import write_features
 from itertools import islice
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 
 # FILENAME = 'enwiki-latest-pages-articles.xml.bz2'
@@ -21,6 +23,10 @@ download_wikipedia_file(FILENAME)
 
 print('Extracting features...')
 redirects = read_redirects(FILENAME)
-pages = read_pages(FILENAME)
-pages = islice(pages, 100)
-write_features(pages, redirects)
+pages = pd.DataFrame(
+    read_pages(FILENAME),
+    columns=['title', 'text']
+)
+pages_train, pages_test = train_test_split(pages, test_size=0.2)
+write_features(pages_train, redirects, 'train')
+write_features(pages_test, redirects, 'test')

@@ -4,8 +4,8 @@ I'm going to build the best Entity Linker that I can.
 
 ## TODO
 
-  - create an evaluation data set
-  - write an evaluation script
+  - split data in a training set, a validation set and a test set
+  - write train and test scripts
   - write more TODOs
 
 ## The Plan

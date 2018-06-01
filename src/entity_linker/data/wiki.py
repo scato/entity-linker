@@ -12,15 +12,17 @@ def resolve_alias(title, aliases):
     return title
 
 
-def write_features(pages, redirects):
-    os.makedirs(LOCAL_ROOT, exist_ok=True)
+def write_features(pages, redirects, data_set):
+    os.makedirs('{}/{}'.format(LOCAL_ROOT, data_set), exist_ok=True)
 
     aliases = dict(redirects)
 
-    with gzip.open('{}/labels.json.gz'.format(LOCAL_ROOT), mode='wt') as labels_fp:
-        with gzip.open('{}/mentions.json.gz'.format(LOCAL_ROOT), mode='wt') as mentions_fp:
-            with gzip.open('{}/linked_entities.json.gz'.format(LOCAL_ROOT), mode='wt') as linked_entities_fp:
-                for title, text in pages:
+    with gzip.open('{}/{}/labels.json.gz'.format(LOCAL_ROOT, data_set), mode='wt') as labels_fp:
+        with gzip.open('{}/{}/mentions.json.gz'.format(LOCAL_ROOT, data_set), mode='wt') as mentions_fp:
+            with gzip.open('{}/{}/linked_entities.json.gz'.format(LOCAL_ROOT, data_set), mode='wt') as linked_entities_fp:
+                for index, row in pages.iterrows():
+                    title, text = row['title'], row['text']
+
                     wikicode = mwparserfromhell.parse(text)
 
                     wikilinks = wikicode.filter_wikilinks()
