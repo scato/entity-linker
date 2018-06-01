@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+cd "$(dirname $0)/.."
+
+script/bootstrap
+
+bin/create_data_set
