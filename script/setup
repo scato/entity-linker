@@ -5,4 +5,7 @@ cd "$(dirname $0)/.."
 
 script/bootstrap
 
-bin/create_data_sets
+export PYTHONPATH='src'
+
+echo 'Creating data sets...'
+python -m entity_linker.data.create

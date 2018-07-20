@@ -12,40 +12,56 @@ def resolve_alias(title, aliases):
     return title
 
 
-def write_features(pages, redirects, data_set):
+def feature_files_are_present(*data_sets):
+    for data_set in data_sets:
+        if not os.path.isdir('{}/{}'.format(LOCAL_ROOT, data_set)):
+            return False
+
+    return True
+
+
+def write_features(pages, aliases, data_set):
     os.makedirs('{}/{}'.format(LOCAL_ROOT, data_set), exist_ok=True)
 
-    aliases = dict(redirects)
+    labels_filename = '{}/{}/labels.json.gz'.format(LOCAL_ROOT, data_set)
+    mentions_filename = '{}/{}/mentions.json.gz'.format(LOCAL_ROOT, data_set)
+    outgoing_filename = '{}/{}/outgoing.json.gz'.format(LOCAL_ROOT, data_set)
+    linked_entities_filename = '{}/{}/linked_entities.json.gz'.format(LOCAL_ROOT, data_set)
 
-    with gzip.open('{}/{}/labels.json.gz'.format(LOCAL_ROOT, data_set), mode='wt') as labels_fp:
-        with gzip.open('{}/{}/mentions.json.gz'.format(LOCAL_ROOT, data_set), mode='wt') as mentions_fp:
-            with gzip.open('{}/{}/linked_entities.json.gz'.format(LOCAL_ROOT, data_set), mode='wt') as linked_entities_fp:
-                for index, row in pages.iterrows():
-                    title, text = row['title'], row['text']
+    with gzip.open(labels_filename, mode='wt') as labels_fp:
+        with gzip.open(mentions_filename, mode='wt') as mentions_fp:
+            with gzip.open(linked_entities_filename, mode='wt') as linked_entities_fp:
+                with gzip.open(outgoing_filename, mode='wt') as outgoing_fp:
+                    for title, text in pages:
+                        wikicode = mwparserfromhell.parse(text)
 
-                    wikicode = mwparserfromhell.parse(text)
+                        wikilinks = wikicode.filter_wikilinks()
+                        plain_text = wikicode.strip_code()
 
-                    wikilinks = wikicode.filter_wikilinks()
-                    plain_text = wikicode.strip_code()
+                        for wikilink in wikilinks:
+                            label = {
+                                'entity_id': resolve_alias(str(wikilink.title), aliases),
+                                'label': str(wikilink.text or wikilink.title)
+                            }
 
-                    for wikilink in wikilinks:
-                        label = {
-                            'entity_id': resolve_alias(str(wikilink.title), aliases),
-                            'label': str(wikilink.text or wikilink.title)
-                        }
-                        json.dump(label, labels_fp)
-                        labels_fp.write('\n')
+                            json.dump(label, labels_fp)
+                            labels_fp.write('\n')
 
-                    mentions = [
-                        str(wikilink.text or wikilink.title)
-                        for wikilink in wikilinks
-                    ]
-                    json.dump({'text': plain_text, 'mentions': mentions}, mentions_fp)
-                    mentions_fp.write('\n')
+                        mentions = [
+                            str(wikilink.text or wikilink.title)
+                            for wikilink in wikilinks
+                        ]
 
-                    linked_entities = [
-                        resolve_alias(str(wikilink.title), aliases)
-                        for wikilink in wikilinks
-                    ]
-                    json.dump({'entity_id': title, 'linked_entity_ids': linked_entities}, linked_entities_fp)
-                    linked_entities_fp.write('\n')
+                        json.dump({'text': plain_text, 'mentions': mentions}, mentions_fp)
+                        mentions_fp.write('\n')
+
+                        linked_entities = [
+                            resolve_alias(str(wikilink.title), aliases)
+                            for wikilink in wikilinks
+                        ]
+
+                        json.dump({'entity_id': title, 'outgoing_entity_ids': linked_entities}, outgoing_fp)
+                        outgoing_fp.write('\n')
+
+                        json.dump({'text': plain_text, 'linked_entity_ids': linked_entities}, linked_entities_fp)
+                        linked_entities_fp.write('\n')
