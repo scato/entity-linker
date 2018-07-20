@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+cd "$(dirname $0)/.."
+
+script/setup
+
+export PYTHONPATH='src'
+
+echo 'Running test...'
+python -m entity_linker.error.linker 'test'
