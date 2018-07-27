@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+cd "$(dirname $0)/.."
+
+script/setup
+
+export PYTHONPATH='src'
+
+echo 'Running manual validation...'
+python -m entity_linker.error.ner 'validation'

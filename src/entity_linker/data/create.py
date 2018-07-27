@@ -4,7 +4,8 @@ from itertools import islice
 
 from sklearn.model_selection import train_test_split
 
-from entity_linker.data.dict import entity_dict_is_present, build_entity_dict
+from entity_linker.data.dict import entity_dict_is_present, build_entity_dict, \
+    mention_dict_is_present, build_mention_dict
 from entity_linker.data.file import download_wikipedia_file, wikipedia_file_is_present
 from entity_linker.data.wiki import write_features, feature_files_are_present
 from entity_linker.data.xml import read_redirects, read_pages
@@ -46,6 +47,11 @@ def create_data_sets():
         logger.info('Preparing entity dictionary...')
 
         build_entity_dict()
+
+    if not mention_dict_is_present():
+        logger.info('Preparing mention dictionary...')
+
+        build_mention_dict()
 
 
 if __name__ == '__main__':
