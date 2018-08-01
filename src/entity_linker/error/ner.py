@@ -4,7 +4,7 @@ import sys
 from gensim.matutils import sparse2full
 from sklearn.metrics import precision_score, recall_score
 
-from entity_linker import mentions
+from entity_linker.model.ner import mentions
 from entity_linker.data.dict import load_mention_dict
 from entity_linker.data.json import read_json_data
 

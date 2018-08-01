@@ -1,6 +1,17 @@
 #!/bin/sh
 set -eu
 
+SPACY_LANG='en'
+
+get_spacy_models() {
+    python -m spacy info | sed 's/  */ /g' | grep '^ Models' | cut -d' ' -f3-
+}
+
 cd "$(dirname $0)/.."
 
 pip install -qr requirements.txt
+
+if ! (get_spacy_models | grep -q ${SPACY_LANG})
+then
+    python -m spacy download ${SPACY_LANG}
+fi
