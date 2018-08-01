@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import sys
 
@@ -19,10 +21,17 @@ def doc2clipped(doc, dictionary):
 def calculate_metric_for_record(record, metric):
     dictionary = load_mention_dict()
 
-    entities_true = doc2clipped(record['mentions'], dictionary)
-    entities_pred = doc2clipped(mentions(record['text']), dictionary)
+    mentions_true_doc = record['mentions']
+    mentions_pred_doc = mentions(record['text'])
 
-    return metric(entities_true, entities_pred)
+    logger = logging.getLogger('entity_linker')
+    logger.debug('Expected mentions: {}'.format(mentions_true_doc))
+    logger.debug('Actual mentions: {}'.format(mentions_pred_doc))
+
+    mentions_true = doc2clipped(mentions_true_doc, dictionary)
+    mentions_pred = doc2clipped(mentions_pred_doc, dictionary)
+
+    return metric(mentions_true, mentions_pred)
 
 
 def calculate_metric(data_set, metric):
@@ -39,6 +48,8 @@ def calculate_metric(data_set, metric):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
     if len(sys.argv) < 2:
         print('usage: python -m {} data_set'.format(__spec__.name))
         exit(1)
@@ -48,7 +59,7 @@ if __name__ == '__main__':
     print('Calculating NER metrics for "{}" data set...'.format(data_set))
 
     precision = calculate_metric(data_set, precision_score)
-    print('Precision: {}'.format(precision))
-
     recall = calculate_metric(data_set, recall_score)
+
+    print('Precision: {}'.format(precision))
     print('Recall: {}'.format(recall))

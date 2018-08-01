@@ -30,7 +30,7 @@ def create_data_sets():
         aliases = dict(redirects)
 
         # pages = list(read_pages(FILENAME))
-        pages = list(islice(read_pages(FILENAME), 10))
+        pages = list(islice(read_pages(FILENAME), 100))
         pages_training, pages_other = train_test_split(pages, test_size=0.5)
         pages_validation, pages_test = train_test_split(pages_other, test_size=0.5)
 
