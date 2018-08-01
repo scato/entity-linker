@@ -2,39 +2,78 @@
 
 I'm going to build the best Entity Linker that I can.
 
-## TODO
+## Running
 
-  - split data in a training set, a validation set and a test set
-  - write train and test scripts
-  - write more TODOs
+To train the models and test against the test set, just run:
 
-## The Plan
+```bash
+script/test
+```
 
-I want to build an entity linker. I am not going to build a Named Entity
-Recognizer (NER). I want to use SpaCy for that. I do, however, need to build a
-Named Entity Disambiguator (NED).
+This script:
 
-I can use SpaCy as a NER, but I discovered that the tokenizer needs to be
-fine-tuned to work properly. (Specifically, it turned "Koning Willem-Alexander"
-into two mentions: "Koning Willem" and "Alexander".) I was thinking, if I use
-Wikipedia articles (and the page links they contain), then I have a ground truth
-for mentions. It's not an accurate one, but it's good enough for evaluating the
-tokenizer settings.
+  - installs the necessary dependencies (using `script/bootstrap`)
+  - prepares the different data sets (using `script/setup`)
+  - calculates metrics for the test data set
 
-Now I would love to be able to use Wikipedia articles as a training set for my
-NED, but there are some problems with the page links. First, most of them are
-actually not named entities (so not people, organizations, etc.). Second, an
-entity is only linked to once. (Consecutive mentions of the same entities are
-plain text).
+The output could look like this:
 
-What I want to try instead is to create a universal entity disambiguator. For
-each article, I have a list of page links (both the mention - or label - and
-the page). I can use these lists to create two other lists:
-  - a list of label/page pairs
-  - a graph containing all page links
-  - a collection of input/output data, input being mentions (labels) and output
-    being entities (pages)
+```
+$ script/test
+Creating data sets...
+Running test...
+Calculating metrics for "test" data set...
+Precision: 0.3333333333333333
+Recall: 0.0007898894154818326
+```
 
-I can use the label/page pairs to create entity candidates. I can use the page
-link graph to create an embedding for entities. I can validate the disambiguator
-using the input/output data.
+## Named Entity Linking (NEL)
+
+Entity Linking is done in three steps:
+
+  - extract mentions (NER)
+  - generate candidates (NEC)
+  - disambiguate candidates (NED)
+
+## Named Entity Recognition (NER)
+
+Named entity recognition is performed by [spaCy](https://spacy.io/).
+
+The validation data set was used to tweak processing and parameters:
+
+```
+$ script/validate
+Creating data sets...
+Running manual validation...
+Calculating metrics for "validation" data set...
+Precision: 0.5291377012538027
+Recall: 0.24313756550840926
+```
+
+## Named Entity Candidate generation (NEC)
+
+TODO
+
+## Named Entity Disambiguation (NED)
+
+TODO
+
+## Notes
+
+```
+(text)-[NER]->(mentions)-[NEC]->(candidates)-[NED]->(entities)
+
+(text/labels)-[config]->(NER)
+(labels/pages)-[ES]->(NEC)
+(id/pages)-[PCA]->(NED)
+
+(text/pages)-[validate/test]->(accuracy/recall)
+
+script/bootstrap - install dependencies
+script/setup     - prepare data sets and the NEC database
+script/train     - train models
+script/validate  - validate NER, NEC+NED, and NER+NEC+NED
+script/test      - test NEL
+
+script/build     - train models using ALL data?
+```
